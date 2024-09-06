@@ -4,22 +4,22 @@ from PIL import Image
 from io import BytesIO
 import os
 from uuid import uuid4
+import boto3 
 
 output_dir = 'output_images'
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
-async def upload_to_aws(local_file,bucket,s3_file):
+async def upload_to_aws(local_file, bucket, s3_file):
     ACCESS_KEY = os.getenv('AMAZON_ACCESS_KEY')
     SECRET_KEY = os.getenv('AMAZON_SECRET_KEY')
     s3 = boto3.client('s3', aws_access_key_id=ACCESS_KEY,
                       aws_secret_access_key=SECRET_KEY)
     try:
-        s3.upload_file(local_file, bucket,s3_file)
-        
+        s3.upload_file(local_file, bucket, s3_file)
         return True
     except FileNotFoundError:
-        return False
+        return False
 
 def process_image(image_url, output_quality=50):
     try:
@@ -31,9 +31,10 @@ def process_image(image_url, output_quality=50):
         
         img.save(output_image_path, "JPEG", quality=output_quality)
         
-        await upload_to_aws(output_image_path,"First_bucket", "compressed_Image/"+output_image_path)
-                file_name = "https://spyne.s3.amazonaws.com/compressed_Image/"+output_image_path
-        
+        # await upload_to_aws(output_image_path,"First_bucket", output_image_path)
+        # file_name = "https://First_bucket.s3.amazonaws.com/"+output_image_path
+        # return file_name
+           
         return output_image_path
     except Exception as e:
         print(f"Failed to process image {image_url}: {e}")
